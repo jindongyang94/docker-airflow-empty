@@ -1,0 +1,132 @@
+version: '3.5'
+services:
+    redis:
+        image: 'redis:5.0.5'
+        # command: redis-server --requirepass redispass
+        labels:
+            company: hubble
+            name: redis
+
+    postgres:
+        image: postgres:9.6
+        environment:
+            - POSTGRES_USER=airflow
+            - POSTGRES_PASSWORD=airflow
+            - POSTGRES_DB=airflow
+        # Uncomment these lines to persist data on the local filesystem.
+        #     - PGDATA=/var/lib/postgresql/data/pgdata
+        # volumes:
+        #     - ./pgdata:/var/lib/postgresql/data/pgdata
+        labels:
+            company: hubble
+            name: database
+
+    webserver:
+        image: hubble/docker-airflow:latest
+        restart: always
+        depends_on:
+            - postgres
+            - redis
+        environment:
+            - LOAD_EX=n
+            - FERNET_KEY=ttbraK5ptmedcL9yP2NPP5w7xpWfZDSfim0a2MWzuZ4=
+            - EXECUTOR=Celery
+            # - POSTGRES_USER=airflow
+            # - POSTGRES_PASSWORD=airflow
+            # - POSTGRES_DB=airflow
+            # - REDIS_PASSWORD=redispass
+        volumes:
+            # Make sure you have .aws/credentials and .pgpass file in your root home in your local computer.
+            # This is only used for local testing as docker-compose would not be used for deployment on AWS EKS.
+            - ~/.aws/credentials:/usr/local/airflow/.aws/credentials
+            - ~/.pgpass:/usr/local/airflow/.pgpass
+            # Uncomment to include custom plugins
+            # - ./plugins:/usr/local/airflow/plugins
+        ports:
+            - "8080:8080"
+        command: webserver
+        build:
+            context: .
+            shm_size: '2gb'
+        shm_size: '2gb'
+        healthcheck:
+            test: ["CMD-SHELL", "[ -f /usr/local/airflow/airflow-webserver.pid ]"]
+            interval: 30s
+            timeout: 30s
+            retries: 3
+        labels:
+            company: hubble
+            name: webserver
+
+    flower:
+        image: hubble/docker-airflow:latest
+        restart: always
+        depends_on:
+            - redis
+        environment:
+            - EXECUTOR=Celery
+            # - REDIS_PASSWORD=redispass
+        ports:
+            - "5555:5555"
+        command: flower
+        labels:
+            company: hubble
+            name: flower
+
+    scheduler:
+        image: hubble/docker-airflow:latest
+        restart: always
+        depends_on:
+            - webserver
+        volumes:
+            # Make sure you have .aws/credentials and .pgpass file in your root home in your local computer.
+            # This is only used for local testing as docker-compose would not be used for deployment on AWS EKS.
+            - ~/.aws/credentials:/usr/local/airflow/.aws/credentials
+            - ~/.pgpass:/usr/local/airflow/.pgpass
+            # Uncomment to include custom plugins
+            # - ./plugins:/usr/local/airflow/plugins
+        environment:
+            - LOAD_EX=n
+            - FERNET_KEY=ttbraK5ptmedcL9yP2NPP5w7xpWfZDSfim0a2MWzuZ4=
+            - EXECUTOR=Celery
+            # - POSTGRES_USER=airflow
+            # - POSTGRES_PASSWORD=airflow
+            # - POSTGRES_DB=airflow
+            # - REDIS_PASSWORD=redispass
+        build:
+            context: .
+            shm_size: '2gb'
+        shm_size: '2gb'
+        command: scheduler
+        labels:
+            company: hubble
+            name: scheduler
+
+    worker:
+        # scale workers using: < docker-compose -f docker-compose-CeleryExecutor.yml scale worker=5 >
+        image: hubble/docker-airflow:latest
+        restart: always
+        depends_on:
+            - scheduler
+        volumes:
+            # Make sure you have .aws/credentials and .pgpass file in your root home in your local computer.
+            # This is only used for local testing as docker-compose would not be used for deployment on AWS EKS.
+            - ~/.aws/credentials:/usr/local/airflow/.aws/credentials
+            - ~/.pgpass:/usr/local/airflow/.pgpass
+            # Uncomment to include custom plugins
+            # - ./plugins:/usr/local/airflow/plugins
+        environment:
+            - FERNET_KEY=ttbraK5ptmedcL9yP2NPP5w7xpWfZDSfim0a2MWzuZ4=
+            - EXECUTOR=Celery
+            # - POSTGRES_USER=airflow
+            # - POSTGRES_PASSWORD=airflow
+            # - POSTGRES_DB=airflow
+            # - REDIS_PASSWORD=redispass
+        build:
+            context: .
+            shm_size: '2gb'
+        shm_size: '2gb'
+        command: worker
+        labels:
+            company: hubble
+            name: worker

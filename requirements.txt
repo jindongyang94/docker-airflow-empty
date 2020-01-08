@@ -1,0 +1,19 @@
+boto3
+botocore
+
+# DB Migration Libraries
+psycopg2-binary>=2.8.3
+progressbar2>=3.42.0
+tqdm>=4.32.2
+
+# Web-Scraping Libraries
+numpy
+pandas
+bs4
+selenium
+requests
+pyyaml
+gspread
+gspread-formatting
+PyOpenSSL
+oauth2client>=4.1.3

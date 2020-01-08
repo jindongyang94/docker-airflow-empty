@@ -1,0 +1,13 @@
+.git
+# Python
+__pycache__
+*.pyc
+
+# Secret Files
+secrets*.yaml
+modules/webscraping/gebiz/config/*.json
+encoding.txt
+
+# Pycharm
+.DS_Store
+*.mypy*
