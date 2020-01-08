@@ -87,12 +87,17 @@ services:
             # - ./plugins:/usr/local/airflow/plugins
         environment:
             - LOAD_EX=n
+<<<<<<< HEAD
             - FERNET_KEY=ttbraK5ptmedcL9yP2NPP5w7xpWfZDSfim0a2MWzuZ4=
+=======
+            - FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
+>>>>>>> 70892af494edf9feef7d632cfa746fcb83385a35
             - EXECUTOR=Celery
             # - POSTGRES_USER=airflow
             # - POSTGRES_PASSWORD=airflow
             # - POSTGRES_DB=airflow
             # - REDIS_PASSWORD=redispass
+<<<<<<< HEAD
         build:
             context: .
             shm_size: '2gb'
@@ -105,10 +110,17 @@ services:
     worker:
         # scale workers using: < docker-compose -f docker-compose-CeleryExecutor.yml scale worker=5 >
         image: hubble/docker-airflow:latest
+=======
+        command: scheduler
+
+    worker:
+        image: puckel/docker-airflow:1.10.6
+>>>>>>> 70892af494edf9feef7d632cfa746fcb83385a35
         restart: always
         depends_on:
             - scheduler
         volumes:
+<<<<<<< HEAD
             # Make sure you have .aws/credentials and .pgpass file in your root home in your local computer.
             # This is only used for local testing as docker-compose would not be used for deployment on AWS EKS.
             - ~/.aws/credentials:/usr/local/airflow/.aws/credentials
@@ -117,11 +129,19 @@ services:
             # - ./plugins:/usr/local/airflow/plugins
         environment:
             - FERNET_KEY=ttbraK5ptmedcL9yP2NPP5w7xpWfZDSfim0a2MWzuZ4=
+=======
+            - ./dags:/usr/local/airflow/dags
+            # Uncomment to include custom plugins
+            # - ./plugins:/usr/local/airflow/plugins
+        environment:
+            - FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
+>>>>>>> 70892af494edf9feef7d632cfa746fcb83385a35
             - EXECUTOR=Celery
             # - POSTGRES_USER=airflow
             # - POSTGRES_PASSWORD=airflow
             # - POSTGRES_DB=airflow
             # - REDIS_PASSWORD=redispass
+<<<<<<< HEAD
         build:
             context: .
             shm_size: '2gb'
@@ -130,3 +150,6 @@ services:
         labels:
             company: hubble
             name: worker
+=======
+        command: worker
+>>>>>>> 70892af494edf9feef7d632cfa746fcb83385a35
